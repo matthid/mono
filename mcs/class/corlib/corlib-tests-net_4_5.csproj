@@ -207,6 +207,7 @@
     <Compile Include="Test\System.Runtime.Remoting.Channels\ChannelServicesTest.cs" />
     <Compile Include="Test\System.Runtime.Remoting.Contexts\SynchronizationAttributeTest.cs" />
     <Compile Include="Test\System.Runtime.Remoting.Metadata.W3cXsd2001\SoapHexBinaryTest.cs" />
+    <Compile Include="Test\System.Runtime.Remoting.Messaging\CallContextTest.cs" />    
     <Compile Include="Test\System.Runtime.Remoting\ContextTest.cs" />
     <Compile Include="Test\System.Runtime.Remoting\SoapServicesTest.cs" />
     <Compile Include="Test\System.Runtime.Remoting\SynchronizationAttributeTest.cs" />
@@ -535,7 +536,8 @@
     <Compile Include="Test\System\UIntPtrTest.cs" />
     <Compile Include="Test\System\ValueTypeTest.cs" />
     <Compile Include="Test\System\VersionTest.cs" />
-    <Compile Include="Test\System\WeakReferenceTest.cs" />  </ItemGroup>
+    <Compile Include="Test\System\WeakReferenceTest.cs" />
+  </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
