@@ -105,8 +105,12 @@ namespace System.Runtime.Remoting.Messaging
 		{
 			return (LogicalCallContext) LogicalCallContext.Clone ();
 		}
+		internal static object SetCurrentCallContext (LogicalCallContext ctx)
+		{
+			return SetCurrentCallContext (ctx, false);
+		}
 
-		internal static object SetCurrentCallContext (LogicalCallContext ctx, bool resetIllogicalContext = false)
+		internal static object SetCurrentCallContext (LogicalCallContext ctx, bool resetIllogicalContext)
 		{
 			object oldData = new object [] { datastore, LogicalCallContext };
 
