@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -43,6 +43,7 @@
     <Compile Include="Mono\DataConverter.cs" />
     <Compile Include="Test\Microsoft.Win32\RegistryKeyTest.cs" />
     <Compile Include="Test\Mono\DataConvertTest.cs" />
+    <Compile Include="Test\OldNUnitWorkaround.cs" />
     <Compile Include="Test\System.Collections.Concurrent\CollectionStressTestHelper.cs" />
     <Compile Include="Test\System.Collections.Concurrent\ConcurrentDictionaryTests.cs" />
     <Compile Include="Test\System.Collections.Concurrent\ConcurrentQueueTests.cs" />
@@ -553,18 +554,29 @@
       <Project>{07C1F58B-9E99-47F8-A847-79EDA5157DA8}</Project>
       <Name>corlib-net_4_5</Name>
     </ProjectReference>
-    <Reference Include="nunit.framework">
-      <HintPath>..\lib\net_4_5\nunit.framework.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
-    <Folder Include="Test\System.Runtime.Remoting.Messaging\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Test\resources\Resources.resources">
       <LogicalName>Resources.resources</LogicalName>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Mono.Posix, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Program Files (x86)\Mono-3.2.3\lib\mono\4.5\Mono.Posix.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.6.3.13283, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
