@@ -224,7 +224,7 @@ namespace MonoTests.System.Runtime.Remoting.Messaging
 				task => RetrieveIllogicalDataAndSignalDone ()
 			);
 			//Wait
-			spawnedThreadCompletedEWH.WaitOne (testWaitTimeoutMillis);
+			Assert.IsTrue (spawnedThreadCompletedEWH.WaitOne (testWaitTimeoutMillis), "thread did not finish!");
 			//A
 			Assert.AreNotEqual (normaldata, retrievedData, "CallContext Illogical Data set before a task should not flow to a new thread started by TaskFactory.");
 			Assert.IsNull (retrievedData);
