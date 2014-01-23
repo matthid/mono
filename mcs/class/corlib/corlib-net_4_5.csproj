@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -459,6 +459,7 @@
     <Compile Include="System.Reflection\MonoGenericMethod.cs" />
     <Compile Include="System.Reflection\MonoMethod.cs" />
     <Compile Include="System.Reflection\MonoModule.cs" />
+    <Compile Include="System.Reflection\MonoParameterInfo.cs" />
     <Compile Include="System.Reflection\MonoProperty.cs" />
     <Compile Include="System.Reflection\ObfuscateAssemblyAttribute.cs" />
     <Compile Include="System.Reflection\ObfuscationAttribute.cs" />
@@ -1684,7 +1685,8 @@
     <Compile Include="System\Void.cs" />
     <Compile Include="System\WeakReference.cs" />
     <Compile Include="System\WeakReference_T.cs" />
-    <Compile Include="System\WindowsConsoleDriver.cs" />  </ItemGroup>
+    <Compile Include="System\WindowsConsoleDriver.cs" />
+  </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
@@ -1694,17 +1696,15 @@
   -->
   <PropertyGroup>
     <PreBuildEvent>
-
     </PreBuildEvent>
     <PostBuildEvent>
       xcopy $(TargetName).* $(ProjectDir)..\lib\net_4_5\ /Y /R /D
   </PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="resources/collation.core.bin">
       <LogicalName>collation.core.bin</LogicalName>
