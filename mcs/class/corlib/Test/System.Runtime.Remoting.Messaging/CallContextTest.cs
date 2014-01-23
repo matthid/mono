@@ -166,7 +166,12 @@ namespace MonoTests.System.Runtime.Remoting.Messaging
 			//A
 			Task.Factory
 				.StartNew (
-				() => CallContext.LogicalSetData (dataSlotName, "Set in Task"))
+				() => {
+					CallContext.LogicalSetData (dataSlotName, "Set in Task");
+					Console.WriteLine ("Task-Thread: {0}", Thread.CurrentThread.ManagedThreadId);
+					return;
+				}
+					)
 				.ContinueWith (
 				task => RetrieveLogicalDataAndSignalDone ()
 			);
@@ -180,12 +185,19 @@ namespace MonoTests.System.Runtime.Remoting.Messaging
 		[Test]
 		public void IllogicalSetData_ShouldNotFlowFromATaskToItsContinuation ()
 		{
+			Console.WriteLine ("GetData: {0}", CallContext.GetData (dataSlotName));
+			Console.WriteLine ("GetLogicalData: {0}", CallContext.LogicalGetData (dataSlotName));
+			Console.WriteLine ("Unittest-Thread: {0}", Thread.CurrentThread.ManagedThreadId);
 			//A
 			CallContext.SetData (dataSlotName, "normalData");
 			//A
 			Task.Factory
 				.StartNew (
-				() => CallContext.SetData (dataSlotName, "Set in Task"))
+				() => {
+					CallContext.SetData (dataSlotName, "Set in Task");
+					Console.WriteLine ("Task-Thread: {0}", Thread.CurrentThread.ManagedThreadId);
+					return;
+				})
 				.ContinueWith (
 				task => RetrieveIllogicalDataAndSignalDone ()
 			);
@@ -301,6 +313,7 @@ namespace MonoTests.System.Runtime.Remoting.Messaging
 
 		void RetrieveLogicalDataAndSignalDone ()
 		{
+			Console.WriteLine ("RetrieveLogicalDataAndSignalDone-Thread: {0}", Thread.CurrentThread.ManagedThreadId);
 			retrievedData = (string)CallContext.LogicalGetData (dataSlotName); //GetLogicalData
 			spawnedThreadDidRunBeforeTimeout = true;
 			spawnedThreadCompletedEWH.Set ();
@@ -308,6 +321,7 @@ namespace MonoTests.System.Runtime.Remoting.Messaging
 
 		void RetrieveIllogicalDataAndSignalDone ()
 		{
+			Console.WriteLine ("RetrieveIllogicalDataAndSignalDone-Thread: {0}", Thread.CurrentThread.ManagedThreadId);
 			retrievedData = (string)CallContext.GetData (dataSlotName); //GetData, not Logical
 			spawnedThreadDidRunBeforeTimeout = true;
 			spawnedThreadCompletedEWH.Set ();
