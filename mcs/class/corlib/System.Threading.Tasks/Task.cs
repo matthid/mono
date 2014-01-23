@@ -334,6 +334,7 @@ namespace System.Threading.Tasks
 			// Already set the scheduler so that user can call Wait and that sort of stuff
 			continuation.scheduler = scheduler;
 			continuation.Status = TaskStatus.WaitingForActivation;
+			continuation.context = ExecutionContext.Capture ();
 
 			ContinueWith (new TaskContinuation (continuation, options));
 		}
@@ -384,7 +385,8 @@ namespace System.Threading.Tasks
 		#region Internal and protected thingies
 		internal void Schedule ()
 		{
-			context = ExecutionContext.Capture ();
+			if (context == null)
+				context = ExecutionContext.Capture ();
 			Status = TaskStatus.WaitingToRun;
 			scheduler.QueueTask (this);
 		}
