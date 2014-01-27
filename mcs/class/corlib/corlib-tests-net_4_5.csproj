@@ -533,6 +533,7 @@
     <Compile Include="Test\System\VersionTest.cs" />
     <Compile Include="Test\System\WeakReferenceTest.cs" />
     <Compile Include="Test\System.Runtime.Remoting.Messaging\CallContextTest.cs" />
+    <Compile Include="Test\System.Threading.Tasks\MemberComparer.cs" />
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

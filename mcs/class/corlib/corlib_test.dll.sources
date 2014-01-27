@@ -473,6 +473,7 @@ System.Threading/MutexCas.cs
 System.Threading/ThreadCas.cs
 System.Threading/WaitHandleCas.cs
 System.Threading.Tasks/ConcurrentExclusiveSchedulerPairTest.cs
+System.Threading.Tasks/MemberComparer.cs
 System.Threading.Tasks/TaskTest.cs
 System.Threading.Tasks/Task_T_Test.cs
 System.Threading.Tasks/TaskSchedulerTest.cs

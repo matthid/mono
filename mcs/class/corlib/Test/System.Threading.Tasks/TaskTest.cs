@@ -33,6 +33,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Security.Principal;
 using NUnit.Framework;
 
 #if !MOBILE
@@ -634,6 +635,74 @@ namespace MonoTests.System.Threading.Tasks
 		}
 
 		[Test]
+		public void ContinueWith_ShouldInheritExecutionContext()
+		{
+			Assert.IsFalse(ExecutionContext.IsFlowSuppressed(), "Test presuppose a normal ExecutionContext, in which flow has not been suppressed.");
+			//A
+			var spawnCompleteEWH = new EventWaitHandle(false, EventResetMode.AutoReset);
+			var testPrincipal= new GenericPrincipal(new GenericIdentity("username"), null);
+			Thread.CurrentPrincipal = testPrincipal;
+			ExecutionContext originalContext = ExecutionContext.Capture();
+			ExecutionContext contextInContinuation = null;
+			IPrincipal principalInContinuation = null;
+			//A
+			Task.Factory
+				.StartNew(() =>{})
+				.ContinueWith(
+					task =>
+					{
+						contextInContinuation = ExecutionContext.Capture();
+						principalInContinuation = Thread.CurrentPrincipal;
+						spawnCompleteEWH.Set();
+					});
+			//Wait
+			var didNotTimeout= spawnCompleteEWH.WaitOne(2000);
+			//A
+			var isIdenticalExecutionContext = MemberComparer.MemberCompare(originalContext, contextInContinuation);
+			Assert.IsTrue(isIdenticalExecutionContext,"Expected original ExecutionContext to be copied to a Task.Continuation but {0}", isIdenticalExecutionContext);
+			var isSameSecurityPrincipal = MemberComparer.MemberCompare (testPrincipal, principalInContinuation);
+			Assert.IsTrue(isSameSecurityPrincipal, "Expected security context to be copied into thread for new task but {0}", isSameSecurityPrincipal);
+			Assert.IsTrue(didNotTimeout, "Test did not finish - gave up waiting for spawned thread to complete.");
+		}
+
+		[Test]
+		public void ContinueWith_ShouldNotInheritExecutionContextFromTask()
+		{
+			Assert.IsFalse(ExecutionContext.IsFlowSuppressed(), "Test presuppose a normal ExecutionContext, in which flow has not been suppressed.");
+			//A
+			var spawnCompleteEWH = new EventWaitHandle(false, EventResetMode.AutoReset);
+			ExecutionContext originalContext = ExecutionContext.Capture();
+			ExecutionContext ecInTask = null;
+			ExecutionContext ecInContinuation = null;
+			IPrincipal principalInTask = null;
+			IPrincipal principalInContinuation = null;
+			//A
+			Task.Factory
+				.StartNew(() =>
+					{
+						Thread.CurrentPrincipal = principalInTask = new GenericPrincipal(new GenericIdentity("user"), null); //changing the security context will change the ExecutionContext
+						ecInTask = ExecutionContext.Capture();
+						spawnCompleteEWH.Set();
+					})
+				.ContinueWith(
+					task =>
+					{
+						ecInContinuation = ExecutionContext.Capture();
+						principalInContinuation = Thread.CurrentPrincipal;
+						spawnCompleteEWH.Set();
+					});
+			//Wait for both task & continuation
+			var didNotTimeout = spawnCompleteEWH.WaitOne(2000) && spawnCompleteEWH.WaitOne(2000);
+			//A
+			Assert.AreNotEqual(principalInTask, principalInContinuation, "Security Context, including Thread.CurrentPrincipal, should not flow from Task to Continuation");
+			var result1 = MemberComparer.MemberCompare(ecInTask, ecInContinuation);
+			Assert.IsFalse(result1, "Expected ExecutionContext in Task to _not_ flow to Continuation but they were identical.");
+			var result2 = MemberComparer.MemberCompare(originalContext, ecInContinuation);
+			Assert.IsTrue(result2, "Expected original ExecutionContext to be copied to a Task.Continuation but {0}", result2);
+			Assert.IsTrue(didNotTimeout, "Test did not finish - gave up waiting for spawned threads to complete.");
+		}
+
+		[Test]
 		public void MultipleTasks()
 		{
 			ParallelTestHelper.Repeat (delegate {
@@ -896,6 +965,62 @@ namespace MonoTests.System.Threading.Tasks
 				Assert.Fail ();
 			} catch (ArgumentNullException) {
 			}
+		}
+
+		[Test]
+		public void StartNew_ShouldInheritExecutionContext()
+		{
+			//A
+			Assert.IsFalse(ExecutionContext.IsFlowSuppressed(), "Test presuppose a normal ExecutionContext, in which flow has not been suppressed.");
+			var spawnedCompletedEWH = new EventWaitHandle(false, EventResetMode.AutoReset);
+			var testPrincipal = new GenericPrincipal(new GenericIdentity("username"), null);
+			Thread.CurrentPrincipal = testPrincipal;
+			ExecutionContext originalContext = ExecutionContext.Capture();
+			ExecutionContext contextInNewTask = null;
+			IPrincipal principalInNewTask = null;
+			//A
+			Task.Factory
+				.StartNew(() => 
+					{
+						contextInNewTask = ExecutionContext.Capture();
+						principalInNewTask = Thread.CurrentPrincipal;
+						spawnedCompletedEWH.Set();
+					});
+			//Wait
+			var didNotTimeout = spawnedCompletedEWH.WaitOne(2000);
+			//A
+			var result = MemberComparer.MemberCompare(originalContext, contextInNewTask);
+			Assert.IsTrue(result, "Expected original ExecutionContext to be copied to a Task but {0}", result);
+			var isSameSecurityPrincipal = MemberComparer.MemberCompare (testPrincipal, principalInNewTask);
+			Assert.IsTrue(isSameSecurityPrincipal,"Security context should have flowed into thread for new task but {0}", isSameSecurityPrincipal);
+			Assert.IsTrue(didNotTimeout, "Test did not finish - gave up waiting for spawned thread to complete.");
+		}
+
+		[Test]
+		public void StartNew_ExecutionContextChangesShouldNotChangeOriginalExecutionContext()
+		{
+			//A
+			Assert.IsFalse(ExecutionContext.IsFlowSuppressed(), "Test presuppose a normal ExecutionContext, in which flow has not been suppressed.");
+			var spawnCompletedEWH = new EventWaitHandle(false, EventResetMode.AutoReset);
+			ExecutionContext originalContext = ExecutionContext.Capture();
+			ExecutionContext contextInTask = null;
+			IPrincipal principalInTask = null;
+			//A
+			Task.Factory
+				.StartNew(() =>
+					{
+						Thread.CurrentPrincipal = principalInTask= new GenericPrincipal(new GenericIdentity("inTask"), null);
+						contextInTask = ExecutionContext.Capture();
+						spawnCompletedEWH.Set();
+					});
+			//Wait
+			var didNotTimeout = spawnCompletedEWH.WaitOne(2000);
+			//A
+			Assert.AreNotEqual(Thread.CurrentPrincipal, principalInTask,"Change of security context in a task should not flow back to original context");
+			var compareResult = MemberComparer.MemberCompare(originalContext, contextInTask);
+			Console.WriteLine("Compare ExecutionContexts result is " + compareResult);
+			Assert.IsFalse(compareResult, "Expected ExecutionContexts to differ but were identical. Could consider dropping this assertion. The *publicly* testable fact (as opposed to reflection on private members) is the above assertion that the security context (ie the Principal) change did not flow back to the original context."); 
+			Assert.IsTrue(didNotTimeout, "Test did not finish - gave up waiting for spawned thread to complete.");
 		}
 
 		[Test, ExpectedException (typeof (InvalidOperationException))]
